@@ -13,6 +13,13 @@ public var runMaxAnimationSpeed : float = 1.0;
 public var jumpAnimationSpeed : float = 1.15;
 public var landAnimationSpeed : float = 1.0;
 
+//Attack Animations
+public var attack1Animation : AnimationClip;
+public var attack2Animation : AnimationClip;
+
+public var attack1AnimationSpeed : float = 1.0;
+public var attack2AnimationSpeed : float = 1.0;
+
 private var _animation : Animation;
 
 enum CharacterState {
@@ -21,6 +28,8 @@ enum CharacterState {
 	Trotting = 2,
 	Running = 3,
 	Jumping = 4,
+	Attack1 = 5,
+	Attack2 = 6,
 }
 
 private var _characterState : CharacterState;
@@ -298,6 +307,7 @@ function Update() {
 	{
 		lastJumpButtonTime = Time.time;
 	}
+	
 
 	UpdateSmoothedMovementDirection();
 	
@@ -317,8 +327,35 @@ function Update() {
 	var controller : CharacterController = GetComponent(CharacterController);
 	collisionFlags = controller.Move(movement);
 	
-	// ANIMATION sector
-	if(_animation) {
+	
+	if(Input.GetKeyUp(KeyCode.Alpha1))
+	{
+		_characterState = CharacterState.Attack1;
+	}
+	
+	if(Input.GetKeyUp(KeyCode.Alpha2))
+	{
+		_characterState = CharacterState.Attack2;
+	}
+	
+	
+	// ANIMATION sector	
+	if(_animation) {	
+	
+		//Attack Animations
+		/*if(Input.GetKeyUp(KeyCode.Alpha1))
+		{
+			_animation[attack1Animation.name].speed = attack1AnimationSpeed;
+			_animation[attack1Animation.name].wrapMode = WrapMode.Once;
+			_animation.CrossFade(attack1Animation.name);
+		}
+		else if(Input.GetKeyUp(KeyCode.Alpha2))
+		{
+			_animation[attack2Animation.name].speed = attack1AnimationSpeed;
+			_animation[attack2Animation.name].wrapMode = WrapMode.Once;
+			_animation.CrossFade(attack2Animation.name);
+		}*/
+	
 		if(_characterState == CharacterState.Jumping) 
 		{
 			if(!jumpingReachedApex) {
@@ -332,28 +369,45 @@ function Update() {
 			}
 		} 
 		else 
-		{
-			if(controller.velocity.sqrMagnitude < 0.1) {
-				_animation.CrossFade(idleAnimation.name);
-			}
-			else 
-			{
-				if(_characterState == CharacterState.Running) {
-					_animation[runAnimation.name].speed = Mathf.Clamp(controller.velocity.magnitude, 0.0, runMaxAnimationSpeed);
-					_animation.CrossFade(runAnimation.name);	
+		{	
+		
+			if(!_animation.IsPlaying(attack1Animation.name) && !_animation.IsPlaying(attack2Animation.name)){
+				if(_characterState == CharacterState.Attack1) {
+					//_animation[attack1Animation.name].speed = attack1AnimationSpeed;
+					_animation[attack1Animation.name].wrapMode = WrapMode.Once;
+					_animation.CrossFade(attack1Animation.name);
+					
 				}
-				else if(_characterState == CharacterState.Trotting) {
-					_animation[walkAnimation.name].speed = Mathf.Clamp(controller.velocity.magnitude, 0.0, trotMaxAnimationSpeed);
-					_animation.CrossFade(walkAnimation.name);	
+				else if(_characterState == CharacterState.Attack2) {
+					//_animation[attack2Animation.name].speed = attack1AnimationSpeed;
+					//_animation[attack2Animation.name].wrapMode = WrapMode.ClampForever;
+					_animation.CrossFade(attack2Animation.name);
 				}
-				else if(_characterState == CharacterState.Walking) {
-					_animation[walkAnimation.name].speed = Mathf.Clamp(controller.velocity.magnitude, 0.0, walkMaxAnimationSpeed);
-					_animation.CrossFade(walkAnimation.name);	
+				else if(controller.velocity.sqrMagnitude < 0.1) {
+					_animation.CrossFade(idleAnimation.name);
 				}
-				
-			}
+				else 
+				{				
+					if(_characterState == CharacterState.Running) {
+						_animation[runAnimation.name].speed = Mathf.Clamp(controller.velocity.magnitude, 0.0, runMaxAnimationSpeed);
+						_animation.CrossFade(runAnimation.name);	
+					}
+					else if(_characterState == CharacterState.Trotting) {
+						_animation[walkAnimation.name].speed = Mathf.Clamp(controller.velocity.magnitude, 0.0, trotMaxAnimationSpeed);
+						_animation.CrossFade(walkAnimation.name);	
+					}
+					else if(_characterState == CharacterState.Walking) {
+						_animation[walkAnimation.name].speed = Mathf.Clamp(controller.velocity.magnitude, 0.0, walkMaxAnimationSpeed);
+						_animation.CrossFade(walkAnimation.name);	
+					} 
+					
+				}
+			}			
 		}
-	}
+		
+		
+		
+	}	
 	// ANIMATION sector
 	
 	// Set rotation to the move direction
